@@ -1,0 +1,30 @@
+# Ambiente virtual Python — nunca versionar
+venv/
+.venv/
+env/
+
+# Arquivos gerados pela aplicação
+/tmp/yt_extractor/
+*.txt.bak
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Variáveis de ambiente (se usar futuramente)
+.env
+.env.*
