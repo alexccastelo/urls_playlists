@@ -1,0 +1,14 @@
+[Unit]
+Description=YouTube Playlist URL Extractor
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/yt-extractor
+ExecStart=/var/www/yt-extractor/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:5000 app:app
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
