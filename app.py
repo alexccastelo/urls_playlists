@@ -1,8 +1,8 @@
 import os
 import uuid
-import subprocess
 import threading
 from flask import Flask, request, jsonify, send_file, render_template
+import yt_dlp
 
 app = Flask(__name__)
 
@@ -14,21 +14,29 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 
 
 def extract_urls(job_id: str, playlist_url: str, output_file: str):
-    """Roda yt-dlp em background e atualiza o status do job."""
+    """Usa a biblioteca yt_dlp em background e atualiza o status do job."""
     try:
-        result = subprocess.run(
-            ["yt-dlp", "--flat-playlist", "--print", "url", playlist_url],
-            capture_output=True,
-            text=True,
-            timeout=600,  # 10 minutos de timeout
-        )
+        urls = []
 
-        if result.returncode != 0:
+        ydl_opts = {
+            "quiet": True,
+            "extract_flat": True,
+            "skip_download": True,
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(playlist_url, download=False)
+
+        if not info or "entries" not in info:
             jobs[job_id]["status"] = "error"
-            jobs[job_id]["error"] = result.stderr.strip() or "Erro desconhecido ao processar a playlist."
+            jobs[job_id]["error"] = "Nenhuma URL encontrada. Verifique se a playlist é pública."
             return
 
-        urls = [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
+        for entry in info["entries"]:
+            if entry and entry.get("url"):
+                urls.append(entry["url"])
+            elif entry and entry.get("id"):
+                urls.append(f"https://www.youtube.com/watch?v={entry['id']}")
 
         if not urls:
             jobs[job_id]["status"] = "error"
@@ -42,12 +50,6 @@ def extract_urls(job_id: str, playlist_url: str, output_file: str):
         jobs[job_id]["count"] = len(urls)
         jobs[job_id]["file"] = output_file
 
-    except subprocess.TimeoutExpired:
-        jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = "Timeout: a playlist demorou demais para processar."
-    except FileNotFoundError:
-        jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = "yt-dlp não encontrado. Instale com: pip install yt-dlp"
     except Exception as e:
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = str(e)

@@ -10,8 +10,8 @@ ExecStart=/www/wwwroot/urls_playlists/venv/bin/gunicorn \
     --workers 2 \
     --bind 127.0.0.1:5000 \
     --timeout 120 \
-    --access-logfile /var/log/yt-extractor-access.log \
-    --error-logfile /var/log/yt-extractor-error.log \
+    --access-logfile /www/wwwlogs/yt-extractor-access.log \
+    --error-logfile /www/wwwlogs/yt-extractor-error.log \
     app:app
 Restart=always
 RestartSec=5
