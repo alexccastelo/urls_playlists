@@ -28,3 +28,4 @@ Thumbs.db
 # Variáveis de ambiente (se usar futuramente)
 .env
 .env.*
+.DS_Store
